@@ -21,17 +21,26 @@
    go mod tidy
 ```
 
-7. В файле `.env.override` (создайте его в корне, если нет) выставьте правильные значения для переменных окружения:
+7. Создайте в корне `.env.override` с данными двух разных аккаунтов TestBoard. Укажите фамилию владельца и используйте покупателя с пустым избранным.
+   Задайте `TEST_AD_TITLE` длиной до 39 символов и укажите абсолютный путь к JPEG или PNG. Второе фото необязательно.
 
+```dotenv
+TEST_OWNER_LOGIN=owner@example.com
+TEST_OWNER_PASSWORD=your_owner_password
+TEST_BUYER_LOGIN=buyer@example.com
+TEST_BUYER_PASSWORD=your_buyer_password
+TEST_AD_TITLE="Котик"
+TEST_AD_PHOTO="/absolute/path/photo.jpeg"
+# TEST_AD_SECOND_PHOTO="/absolute/path/second photo.jpeg"
 ```
-TEST_LOGIN=your_login
-TEST_PASSWORD=your_password
-```
+
+Для теста лимита в каталоге нужны как минимум 50 чужих объявлений от продавцов с заполненной фамилией.
+Для пакета `advertisementSearch` на стенде должно быть объявление «QA Practice — тестовое объявление 1».
 
 8. Для запуска всех тестов достаточно выполнить команду в корне проекта:
 
 ```bash
-  go test -v ./...
+  go test -p 1 -count=1 -v ./...
 ```
 
 9. Отдельный пакет с тестами можно запустить командой:

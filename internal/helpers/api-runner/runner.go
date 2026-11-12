@@ -6,12 +6,20 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"sync"
+	"time"
 
 	"github.com/steinfletcher/apitest"
 )
 
 const (
-	defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+	defaultUserAgent       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+	minimumRequestInterval = 250 * time.Millisecond
+)
+
+var (
+	requestMu     sync.Mutex
+	nextRequestAt time.Time
 )
 
 type ApiTest struct {
@@ -53,7 +61,16 @@ func (at *ApiTest) Create() *apitest.APITest {
 			if len(at.token) != 0 {
 				request.Header.Add("Authorization", "Bearer "+at.token)
 			}
+			waitForRequestSlot()
 		})
+}
+
+// waitForRequestSlot ограничивает частоту запросов: серия без пауз получает 503 от шлюза TestBoard.
+func waitForRequestSlot() {
+	requestMu.Lock()
+	defer requestMu.Unlock()
+	time.Sleep(time.Until(nextRequestAt))
+	nextRequestAt = time.Now().Add(minimumRequestInterval)
 }
 
 func mergeServiceUrls(host string, r *url.URL) error {

@@ -1,7 +1,6 @@
 package advertisementSearch
 
 import (
-	"os"
 	"strings"
 	"testing"
 
@@ -10,10 +9,10 @@ import (
 
 	"api-tests-template/internal/assertions"
 	"api-tests-template/internal/managers/advertisements"
-	"api-tests-template/internal/managers/auth"
 	"api-tests-template/internal/utils"
 
 	base "api-tests-template/tests"
+	"api-tests-template/tests/fixtures"
 )
 
 const (
@@ -41,8 +40,7 @@ func (s *TestSuite) SetupSuite() {
 	require.NotEmpty(t, searchMiddle, "Задайте подстроку из середины названия")
 	require.NotEmpty(t, searchEnd, "Задайте подстроку из конца названия")
 
-	s.token = auth.Login(t, os.Getenv("TEST_LOGIN"), os.Getenv("TEST_PASSWORD")).Token
-	require.NotEmpty(t, s.token, "Ответ авторизации не содержит токен")
+	s.token = fixtures.LoginOwner(t).Token
 }
 
 func (s *TestSuite) TearDownSuite() {
@@ -51,7 +49,7 @@ func (s *TestSuite) TearDownSuite() {
 
 func (s *TestSuite) TestSearchByTitle() {
 	t := s.T()
-	list := advertisements.GetAdvertisementsList(t, s.token, searchMiddle)
+	list := advertisements.GetAdvertisementsList(t, s.token, searchMiddle, "")
 
 	require.NotEmpty(t, list.Items, "Поиск по названию вернул пустой список")
 	assertions.ContainsAdvertisementByTitle(t, list.Items, existingAdTitle)
@@ -73,7 +71,7 @@ func (s *TestSuite) TestSearchByTitle_Substring() {
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
 			t := s.T()
-			list := advertisements.GetAdvertisementsList(t, s.token, tc.search)
+			list := advertisements.GetAdvertisementsList(t, s.token, tc.search, "")
 			assertions.ContainsAdvertisementByTitle(t, list.Items, existingAdTitle)
 		})
 	}

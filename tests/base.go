@@ -2,9 +2,17 @@ package tests
 
 import (
 	"log"
+	"testing"
 
 	"api-tests-template/internal/utils"
 )
+
+// RunSuite загружает окружение и запускает тесты пакета.
+func RunSuite(m *testing.M) {
+	SetupSuite()
+	defer TearDownSuite()
+	m.Run()
+}
 
 // SetupSuite действия перед запуском сьюта с тестами
 func SetupSuite() {
